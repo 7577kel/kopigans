@@ -151,7 +151,7 @@ const DEFAULT_CATALOG = [
   { id: 2, name: "Arabika", img: "arabika.png", defaultPrice: 25000, type: "biji" },
   { id: 3, name: "Decaf", img: "decaf.png", defaultPrice: 35000, type: "biji" },
   { id: 4, name: "Excelsa", img: "excelsa.png", defaultPrice: 35000, type: "biji" },
-  { id: 5, name: "Kopi Luwak", img: "kipi-luwak.png", defaultPrice: 20000, type: "biji" },
+  { id: 5, name: "Kopi Luwak", img: "kopi-luwak.png", defaultPrice: 20000, type: "biji" },
   { id: 6, name: "Liberika", img: "liberika.png", defaultPrice: 35000, type: "biji" },
   /* Menu Minuman */
   { id: 7, name: "Americano", img: "americano.jpg", defaultPrice: 20000, type: "menu" },
