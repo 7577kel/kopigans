@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel — Kopi Gans</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <!--
+    INSTRUKSI SINGKAT:
+    1. Letakkan file ini di folder yang sama dengan index.html
+    2. Pastikan path CSS di atas sesuai struktur proyekmu
+    3. Halaman ini hanya bisa diakses setelah login sebagai "admin"
+       (redirect otomatis jika bukan admin)
+  -->
+    <style>
+      /* ── Layout utama ── */
+      .admin-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 10rem 2rem 4rem;
+      }
+
+      .admin-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .admin-header h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .admin-header h1 span {
+        color: var(--primary);
+      }
+
+      .admin-header .admin-meta {
+        font-size: 1.1rem;
+        color: #aaa;
+      }
+
+      /* ── Tab navigasi ── */
+      .admin-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid #222;
+        padding-bottom: 0;
+      }
+
+      .admin-tab-btn {
+        padding: 0.8rem 2.2rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #aaa;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        transition: 0.2s;
+        font-family: "Poppins", sans-serif;
+        margin-bottom: -1px;
+      }
+
+      .admin-tab-btn:hover {
+        color: #fff;
+      }
+
+      .admin-tab-btn.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+
+      /* ── Banner notifikasi ── */
+      .admin-banner {
+        display: none;
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+      }
+
+      .admin-banner.success {
+        background: #1a3d1a;
+        border: 1px solid #28a745;
+        color: #5dd879;
+      }
+
+      .admin-banner.error {
+        background: #3d1a1a;
+        border: 1px solid #dc3545;
+        color: #f08080;
+      }
+
+      /* ── Tabel admin ── */
+      .admin-table-wrap {
+        overflow-x: auto;
+        border-radius: 8px;
+        border: 1px solid #222;
+      }
+
+      .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1.1rem;
+      }
+
+      .admin-table thead tr {
+        background-color: var(--primary);
+      }
+
+      .admin-table thead th {
+        padding: 1.2rem 1.4rem;
+        color: #fff;
+        font-weight: 600;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      .admin-table tbody tr {
+        border-bottom: 1px solid #1e1e1e;
+        transition: background 0.15s;
+      }
+
+      .admin-table tbody tr:hover {
+        background: #161616;
+      }
+
+      .admin-table tbody tr:nth-child(even) {
+        background: #111;
+      }
+
+      .admin-table tbody tr:nth-child(even):hover {
+        background: #161616;
+      }
+
+      .admin-table td {
+        padding: 1rem 1.4rem;
+        color: #ddd;
+        vertical-align: middle;
+      }
+
+      .col-name {
+        font-weight: 600;
+        color: #fff;
+      }
+
+      .col-id {
+        color: #666;
+        font-size: 0.95rem;
+      }
+
+      /* ── Input harga ── */
+      .price-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .price-input-wrap span {
+        font-size: 1rem;
+        color: #888;
+      }
+
+      .admin-price-input {
+        width: 120px;
+        padding: 0.5rem 0.7rem;
+        background: #1e1e1e;
+        color: #fff;
+        border: 1px solid #444;
+        border-radius: 5px;
+        font-size: 1rem;
+        text-align: right;
+        font-family: "Poppins", sans-serif;
+        transition: border-color 0.2s;
+      }
+
+      .admin-price-input:focus {
+        border-color: var(--primary);
+        outline: none;
+      }
+
+      /* ── Kontrol stok +/- ── */
+      .stock-ctrl {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+      }
+
+      .stock-ctrl-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 5px;
+        border: none;
+        font-size: 1.4rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          opacity 0.2s,
+          transform 0.1s;
+        line-height: 1;
+      }
+
+      .stock-ctrl-btn:active {
+        transform: scale(0.92);
+      }
+
+      .btn-dec {
+        background: #ff9800;
+        color: #fff;
+      }
+
+      .btn-inc {
+        background: #4caf50;
+        color: #fff;
+      }
+
+      .stock-num {
+        font-size: 1.2rem;
+        font-weight: 700;
+        min-width: 32px;
+        text-align: center;
+        color: #fff;
+      }
+
+      /* ── Badge & toggle ── */
+      .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.9rem;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .badge-available {
+        background: #1a3d1a;
+        color: #5dd879;
+        border: 1px solid #28a745;
+      }
+
+      .badge-habis {
+        background: #3d1a1a;
+        color: #f08080;
+        border: 1px solid #dc3545;
+      }
+
+      .toggle-btn {
+        padding: 0.5rem 1.4rem;
+        border-radius: 20px;
+        border: none;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          opacity 0.2s,
+          transform 0.1s;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .toggle-btn:active {
+        transform: scale(0.95);
+      }
+
+      .toggle-available {
+        background: #28a745;
+        color: #fff;
+      }
+
+      .toggle-habis {
+        background: #dc3545;
+        color: #fff;
+      }
+
+      /* ── Tombol simpan ── */
+      .btn-save-all {
+        display: inline-block;
+        margin-top: 1.5rem;
+        padding: 0.85rem 2.5rem;
+        background: var(--primary);
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 700;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-family: "Poppins", sans-serif;
+        transition: background 0.2s;
+      }
+
+      .btn-save-all:hover {
+        background: #9c7143;
+      }
+
+      /* ── Section tersembunyi ── */
+      .admin-section {
+        display: none;
+      }
+
+      .admin-section.active {
+        display: block;
+      }
+
+      .admin-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .admin-stat-card {
+        flex: 1 1 220px;
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 16px;
+        padding: 1.5rem;
+      }
+
+      .admin-stat-card strong {
+        display: block;
+        font-size: 2rem;
+        color: #fff;
+        margin-bottom: 0.5rem;
+      }
+
+      .admin-stat-card span {
+        color: #aaa;
+        font-size: 0.95rem;
+      }
+
+      .history-table-wrap {
+        overflow-x: auto;
+        border-radius: 8px;
+        border: 1px solid #222;
+      }
+
+      .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1.05rem;
+      }
+
+      .history-table thead tr {
+        background-color: #222;
+      }
+
+      .history-table thead th {
+        padding: 1rem 1.2rem;
+        color: #fff;
+        font-weight: 600;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      .history-table tbody tr {
+        border-bottom: 1px solid #1e1e1e;
+        transition: background 0.15s;
+      }
+
+      .history-table tbody tr:hover {
+        background: #161616;
+      }
+
+      .history-table td {
+        padding: 1rem 1.2rem;
+        color: #ddd;
+        vertical-align: top;
+      }
+
+      .history-badge {
+        display: inline-block;
+        background: #1a3d1a;
+        color: #b7f0b7;
+        border-radius: 999px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+      }
+
+      /* ── Navbar tambahan ── */
+      .admin-back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #aaa;
+        font-size: 1.1rem;
+        transition: color 0.2s;
+      }
+
+      .admin-back-link:hover {
+        color: var(--primary);
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 768px) {
+        .admin-table thead th,
+        .admin-table tbody td {
+          padding: 0.8rem 0.9rem;
+          font-size: 1rem;
+        }
+
+        .admin-price-input {
+          width: 100px;
+        }
+      }
+
+      @media (max-width: 450px) {
+        .admin-tabs {
+          flex-wrap: wrap;
+          gap: 0;
+        }
+
+        .admin-tab-btn {
+          font-size: 1rem;
+          padding: 0.7rem 1.4rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ╔══════════════════════════════════════╗
+       ║  NAVBAR                              ║
+       ║  Diambil langsung dari index.html    ║
+       ╚══════════════════════════════════════╝ -->
+    <nav class="navbar">
+      <a href="index.html" class="navbar-logo">Kopi <span>Gans</span></a>
+
+      <div class="navbar-nav" id="admin-navbar-nav"></div>
+
+      <div class="navbar-extra" id="admin-navbar-extra"></div>
+    </nav>
+    <!-- END NAVBAR -->
+
+    <!-- ╔══════════════════════════════════════╗
+       ║  KONTEN UTAMA ADMIN                  ║
+       ╚══════════════════════════════════════╝ -->
+    <div class="admin-wrapper">
+      <!-- Header -->
+      <div class="admin-header">
+        <div>
+          <h1>Panel <span>Admin</span></h1>
+          <p class="admin-meta">
+            Kelola harga &amp; stok semua produk Kopi Gans
+          </p>
+        </div>
+        <a href="index.html" class="admin-back-link"
+          >&#8592; Kembali ke Beranda</a
+        >
+      </div>
+
+      <!-- Banner notifikasi (muncul setelah simpan) -->
+      <div class="admin-banner" id="admin-banner"></div>
+
+      <!-- Tab navigasi: Biji Kopi | Menu Minuman | Histori -->
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" onclick="switchAdminTab('biji')">
+          ☕ Biji Kopi
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('menu')">
+          🍵 Menu Minuman
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('history')">
+          📜 Histori
+        </button>
+      </div>
+
+      <!-- ┌─────────────────────────────────────────────────────────────┐
+         │  TAB 1 — BIJI KOPI                                          │
+         │  Admin bisa: edit harga, tambah/kurangi stok (+/−)          │
+         └─────────────────────────────────────────────────────────────┘ -->
+      <div class="admin-section active" id="section-biji">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Produk</th>
+                <th>Harga (Rp)</th>
+                <th style="text-align: center">Stok</th>
+                <th style="text-align: center">Ubah Stok</th>
+                <th style="text-align: center">Status</th>
+                <th style="text-align: center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-biji">
+              <!-- Diisi oleh renderBijiRows() -->
+            </tbody>
+          </table>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <!-- Tombol simpan harga sekaligus untuk semua biji kopi -->
+          <button class="btn-save-all" style="margin-top: 0;" onclick="saveAllPrices('biji')">
+            💾 Simpan Semua Harga
+          </button>
+          <button class="btn-save-all" style="margin-top: 0; background: #4caf50;" onclick="doPromptAddItem('biji')">
+            ➕ Tambah Biji Kopi
+          </button>
+        </div>
+      </div>
+
+      <!-- ┌─────────────────────────────────────────────────────────────┐
+         │  TAB 2 — MENU MINUMAN                                       │
+         │  Admin bisa: edit harga, toggle Tersedia ↔ Habis            │
+         └─────────────────────────────────────────────────────────────┘ -->
+      <div class="admin-section" id="section-menu">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Menu</th>
+                <th>Harga (Rp)</th>
+                <th style="text-align: center">Ketersediaan</th>
+                <th style="text-align: center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-menu">
+              <!-- Diisi oleh renderMenuRows() -->
+            </tbody>
+          </table>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <!-- Tombol simpan harga sekaligus untuk semua menu -->
+          <button class="btn-save-all" style="margin-top: 0;" onclick="saveAllPrices('menu')">
+            💾 Simpan Semua Harga
+          </button>
+          <button class="btn-save-all" style="margin-top: 0; background: #4caf50;" onclick="doPromptAddItem('menu')">
+            ➕ Tambah Menu Minuman
+          </button>
+        </div>
+      </div>
+
+      <!-- ── TAB 3 — HISTORI PESANAN                                 -->
+      <div class="admin-section" id="section-history">
+        <div class="admin-stats">
+          <div class="admin-stat-card">
+            <strong id="history-customers">0</strong>
+            <span>Total Pelanggan</span>
+          </div>
+          <div class="admin-stat-card">
+            <strong id="history-items">0</strong>
+            <span>Item Terjual</span>
+          </div>
+          <div class="admin-stat-card">
+            <strong id="history-revenue">Rp 0</strong>
+            <span>Total Pendapatan</span>
+          </div>
+        </div>
+
+        <button
+          class="btn-save-all"
+          onclick="clearHistory()"
+          style="margin-bottom: 1.5rem; background: #d9534f"
+        >
+          🗑️ Hapus Riwayat Pesanan
+        </button>
+
+        <div class="history-table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>No. Pesanan</th>
+                <th>Pelanggan</th>
+                <th>Tipe</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Tanggal</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-history">
+              <!-- Diisi oleh renderHistoryRows() -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- END KONTEN UTAMA -->
+
+    <!--
+    ╔══════════════════════════════════════════════════════════════╗
+    ║  SCRIPT LOADING ORDER — WAJIB URUT                          ║
+    ║  1. script.js  → inisialisasi window.stock, window.prices,  ║
+    ║                  fungsi save, auth session                   ║
+    ║  2. admin.js   → logika panel ini (file terpisah di bawah)   ║
+    ╚══════════════════════════════════════════════════════════════╝
+  -->
+    <script src="js/script.js"></script>
+
+    <script>
+      /* ══════════════════════════════════════════════════════════════
+       DATA REFERENSI
+       Mengambil dari window.catalog yang diurus oleh script.js
+       ══════════════════════════════════════════════════════════════ */
+      function getAdminProducts() {
+        return window.catalog || [];
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       GUARD AKSES
+       Redirect ke index.html jika bukan admin.
+       Jalankan setelah script.js memuat session.
+       ══════════════════════════════════════════════════════════════ */
+      (function guardAdmin() {
+        const state = (function () {
+          try {
+            return JSON.parse(sessionStorage.getItem("kopi_gans_login"));
+          } catch {
+            return null;
+          }
+        })();
+
+        if (!state || String(state.role).toLowerCase() !== "admin") {
+          alert("Akses ditolak. Halaman ini hanya untuk admin.");
+          location.replace("index.html");
+        }
+
+        /* Tampilkan tombol logout di navbar */
+        window.currentRole = "admin";
+        window.__kopi_gans_login_state = state;
+
+        const extra = document.getElementById("admin-navbar-extra");
+        if (extra && !document.getElementById("logout-button")) {
+          const btn = document.createElement("a");
+          btn.id = "logout-button";
+          btn.href = "#";
+          btn.textContent = "Logout";
+          btn.style.cssText =
+            "color:#fff;padding:0.5rem 1rem;background:#d9534f;border-radius:4px;margin-left:0.5rem;font-weight:600;font-size:1.3rem;";
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            sessionStorage.removeItem("kopi_gans_login");
+            location.replace("index.html");
+          });
+          extra.appendChild(btn);
+        }
+      })();
+
+      /* ══════════════════════════════════════════════════════════════
+       BANNER NOTIFIKASI
+       Tampil otomatis 3 detik lalu hilang sendiri.
+       ══════════════════════════════════════════════════════════════ */
+      function showBanner(msg, type = "success") {
+        const el = document.getElementById("admin-banner");
+        el.textContent = msg;
+        el.className = "admin-banner " + type;
+        el.style.display = "block";
+        clearTimeout(el._timer);
+        el._timer = setTimeout(() => {
+          el.style.display = "none";
+        }, 3000);
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       SWITCH TAB
+       Panggil: switchAdminTab('biji') atau switchAdminTab('menu')
+       ══════════════════════════════════════════════════════════════ */
+      function switchAdminTab(tab) {
+        ["biji", "menu", "history"].forEach((t) => {
+          document
+            .getElementById("section-" + t)
+            .classList.toggle("active", t === tab);
+        });
+        const tabs = ["biji", "menu", "history"];
+        document.querySelectorAll(".admin-tab-btn").forEach((btn, i) => {
+          btn.classList.toggle("active", tabs[i] === tab);
+        });
+        if (tab === "history") {
+          renderHistory();
+        }
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       RENDER TABEL BIJI KOPI
+       Kolom: Nama | Harga | Stok (angka) | Tombol +/- | Badge status | Aksi
+       ══════════════════════════════════════════════════════════════ */
+      function renderBijiRows() {
+        const tbody = document.getElementById("tbody-biji");
+        tbody.innerHTML = getAdminProducts().filter((p) => p.type === "biji")
+          .map((p) => {
+            const price = Number(window.prices?.[p.id] ?? p.defaultPrice);
+            const stock = Number(window.stock?.[p.id] ?? 10);
+            const isHabis = stock <= 0;
+            return `
+            <tr>
+              <td>
+                <span class="col-name">${p.name}</span>
+                <span class="col-id"> #${p.id}</span>
+              </td>
+              <td>
+                <div class="price-input-wrap">
+                  <span>Rp</span>
+                  <input
+                    class="admin-price-input"
+                    type="number" min="0" step="500"
+                    id="price-${p.id}"
+                    value="${price}"
+                    onchange="onPriceInput(${p.id}, this.value)"
+                  />
+                </div>
+              </td>
+              <td style="text-align:center;">
+                <span class="stock-num" id="stock-${p.id}">${stock}</span>
+              </td>
+              <td style="text-align:center;">
+                <div class="stock-ctrl">
+                  <!-- Klik − : kurangi stok 1 -->
+                  <button class="stock-ctrl-btn btn-dec" onclick="doAdjustStock(${p.id}, -1)">−</button>
+                  <!-- Klik + : tambah stok 1 -->
+                  <button class="stock-ctrl-btn btn-inc" onclick="doAdjustStock(${p.id}, 1)">+</button>
+                </div>
+              </td>
+              <td style="text-align:center;">
+                <span class="status-badge ${isHabis ? "badge-habis" : "badge-available"}" id="badge-${p.id}">
+                  ${isHabis ? "Habis" : "Tersedia"}
+                </span>
+              </td>
+              <td style="text-align:center;">
+                <button class="toggle-btn toggle-habis" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="doRemoveItem(${p.id})">Hapus</button>
+              </td>
+            </tr>`;
+          })
+          .join("");
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       RENDER TABEL MENU MINUMAN
+       Kolom: Nama | Harga | Tombol toggle Tersedia/Habis | Aksi
+       ══════════════════════════════════════════════════════════════ */
+      function renderMenuRows() {
+        const tbody = document.getElementById("tbody-menu");
+        tbody.innerHTML = getAdminProducts().filter((p) => p.type === "menu")
+          .map((p) => {
+            const price = Number(window.prices?.[p.id] ?? p.defaultPrice);
+            const stock = Number(window.stock?.[p.id] ?? 10);
+            const isHabis = stock <= 0;
+            return `
+            <tr>
+              <td>
+                <span class="col-name">${p.name}</span>
+                <span class="col-id"> #${p.id}</span>
+              </td>
+              <td>
+                <div class="price-input-wrap">
+                  <span>Rp</span>
+                  <input
+                    class="admin-price-input"
+                    type="number" min="0" step="500"
+                    id="price-${p.id}"
+                    value="${price}"
+                    onchange="onPriceInput(${p.id}, this.value)"
+                  />
+                </div>
+              </td>
+              <td style="text-align:center;">
+                <!-- Toggle: klik untuk ubah status Tersedia ↔ Habis -->
+                <button
+                  class="toggle-btn ${isHabis ? "toggle-habis" : "toggle-available"}"
+                  id="toggle-${p.id}"
+                  onclick="doToggleMenu(${p.id})"
+                >
+                  ${isHabis ? "✖ Habis" : "✔ Tersedia"}
+                </button>
+              </td>
+              <td style="text-align:center;">
+                <button class="toggle-btn toggle-habis" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="doRemoveItem(${p.id})">Hapus</button>
+              </td>
+            </tr>`;
+          })
+          .join("");
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       AKSI: UPDATE HARGA (satu item)
+       Dipanggil saat nilai input berubah (onchange).
+       Langsung menyimpan ke window.prices & localStorage.
+       ══════════════════════════════════════════════════════════════ */
+      function onPriceInput(id, raw) {
+        const val = Math.max(0, Math.floor(Number(raw) || 0));
+        window.prices[id] = val;
+        /* window.updatePrice sudah ada di script.js — pakai jika tersedia */
+        if (window.updatePrice) {
+          window.updatePrice(id, val);
+        } else {
+          if (window.savePrices) window.savePrices(window.prices);
+          window.dispatchEvent(new Event("price:changed"));
+        }
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       AKSI: SIMPAN SEMUA HARGA (satu tab sekaligus)
+       Baca semua input harga di tab yang aktif, simpan sekaligus.
+       ══════════════════════════════════════════════════════════════ */
+      function saveAllPrices(type) {
+        ADMIN_PRODUCTS.filter((p) => p.type === type).forEach((p) => {
+          const input = document.getElementById("price-" + p.id);
+          if (input) onPriceInput(p.id, input.value);
+        });
+        showBanner("✅ Semua harga berhasil disimpan!");
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       AKSI: TAMBAH / KURANGI STOK BIJI KOPI
+       Pakai window.adjustProductStock dari script.js (sudah ada).
+       Update angka stok & badge status di baris tabel secara instan.
+       ══════════════════════════════════════════════════════════════ */
+      async function doAdjustStock(id, delta) {
+        if (window.adjustProductStock) {
+          await window.adjustProductStock(id, delta);
+        } else {
+          const cur = Number(window.stock?.[id] ?? 10);
+          window.stock[id] = Math.max(0, cur + delta);
+          if (window.saveStock) window.saveStock(window.stock);
+          window.dispatchEvent(new Event("stock:changed"));
+        }
+
+        /* Perbarui tampilan angka dan badge tanpa re-render penuh */
+        const newStock = Number(window.stock?.[id] ?? 10);
+        const numEl = document.getElementById("stock-" + id);
+        const badgeEl = document.getElementById("badge-" + id);
+        if (numEl) numEl.textContent = newStock;
+        if (badgeEl) {
+          const habis = newStock <= 0;
+          badgeEl.textContent = habis ? "Habis" : "Tersedia";
+          badgeEl.className =
+            "status-badge " + (habis ? "badge-habis" : "badge-available");
+        }
+
+        showBanner(
+          newStock <= 0
+            ? `⛔ ${ADMIN_PRODUCTS.find((p) => p.id === id)?.name} sudah habis`
+            : `✅ ${ADMIN_PRODUCTS.find((p) => p.id === id)?.name} stok diperbarui`,
+          newStock <= 0 ? "error" : "success",
+        );
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       AKSI: TOGGLE STATUS MENU MINUMAN
+       Pakai window.toggleMenuStockStatus dari script.js.
+       Klik tombol → status berubah, warna & teks tombol ikut berubah.
+       ══════════════════════════════════════════════════════════════ */
+      async function doToggleMenu(id) {
+        if (window.toggleMenuStockStatus) {
+          await window.toggleMenuStockStatus(id);
+        } else {
+          const cur = Number(window.stock?.[id] ?? 10);
+          window.stock[id] = cur > 0 ? 0 : 10;
+          if (window.saveStock) window.saveStock(window.stock);
+          window.dispatchEvent(new Event("stock:changed"));
+        }
+
+        /* Perbarui tombol toggle tanpa re-render penuh */
+        const newStock = Number(window.stock?.[id] ?? 10);
+        const habis = newStock <= 0;
+        const btn = document.getElementById("toggle-" + id);
+        if (btn) {
+          btn.textContent = habis ? "✖ Habis" : "✔ Tersedia";
+          btn.className =
+            "toggle-btn " + (habis ? "toggle-habis" : "toggle-available");
+        }
+
+        showBanner(
+          habis
+            ? `⛔ ${ADMIN_PRODUCTS.find((p) => p.id === id)?.name} diset Habis`
+            : `✅ ${ADMIN_PRODUCTS.find((p) => p.id === id)?.name} diset Tersedia`,
+        );
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       SINKRONISASI REAKTIF
+       Jika stok/harga berubah dari tempat lain (misal kasir checkout),
+       update tampilan input & angka di tabel ini secara otomatis.
+       ══════════════════════════════════════════════════════════════ */
+      window.addEventListener("stock:changed", () => {
+        ADMIN_PRODUCTS.forEach((p) => {
+          const numEl = document.getElementById("stock-" + p.id);
+          const badgeEl = document.getElementById("badge-" + p.id);
+          const toggleEl = document.getElementById("toggle-" + p.id);
+          const s = Number(window.stock?.[p.id] ?? 10);
+          const habis = s <= 0;
+          if (numEl) numEl.textContent = s;
+          if (badgeEl) {
+            badgeEl.textContent = habis ? "Habis" : "Tersedia";
+            badgeEl.className =
+              "status-badge " + (habis ? "badge-habis" : "badge-available");
+          }
+          if (toggleEl) {
+            toggleEl.textContent = habis ? "✖ Habis" : "✔ Tersedia";
+            toggleEl.className =
+              "toggle-btn " + (habis ? "toggle-habis" : "toggle-available");
+          }
+        });
+      });
+
+      window.addEventListener("price:changed", () => {
+        ADMIN_PRODUCTS.forEach((p) => {
+          const input = document.getElementById("price-" + p.id);
+          if (input)
+            input.value = Number(window.prices?.[p.id] ?? p.defaultPrice);
+        });
+      });
+
+      function formatRupiah(value) {
+        return new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
+        }).format(value);
+      }
+
+      function renderHistory() {
+        const orders = JSON.parse(
+          localStorage.getItem("kopi_gans_orders") || "[]",
+        );
+        const totalCustomers = orders.length;
+        const totalItems = orders.reduce(
+          (sum, order) =>
+            sum +
+            order.items.reduce((itemSum, item) => itemSum + (item.qty || 0), 0),
+          0,
+        );
+        const totalRevenue = orders.reduce(
+          (sum, order) => sum + Number(order.total || 0),
+          0,
+        );
+
+        document.getElementById("history-customers").textContent =
+          totalCustomers;
+        document.getElementById("history-items").textContent = totalItems;
+        document.getElementById("history-revenue").textContent =
+          formatRupiah(totalRevenue);
+
+        const tbody = document.getElementById("tbody-history");
+        if (!orders.length) {
+          tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; color:#aaa;">Belum ada data pesanan.</td>
+          </tr>`;
+          return;
+        }
+
+        tbody.innerHTML = orders
+          .map((order) => {
+            const itemList = order.items
+              .map((item) => `${item.name} x${item.qty}`)
+              .join("<br>");
+            const typeLabel =
+              order.tipe === "dine-in" ? "Makan di Tempat" : "Bawa Pulang";
+            const createdAt = new Date(order.createdAt);
+            const dateText = isNaN(createdAt.getTime())
+              ? "-"
+              : createdAt.toLocaleString("id-ID", {
+                  day: "numeric",
+                  month: "numeric",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+
+            return `
+            <tr>
+              <td><span class="col-id">${order.id}</span></td>
+              <td>${order.nama || "-"}</td>
+              <td>${typeLabel}</td>
+              <td>${itemList}</td>
+              <td>${formatRupiah(Number(order.total || 0))}</td>
+              <td>${dateText}</td>
+            </tr>`;
+          })
+          .join("");
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+       INISIALISASI
+       Render kedua tabel saat DOM siap.
+       ══════════════════════════════════════════════════════════════ */
+      function clearHistory() {
+        if (!confirm("Yakin ingin menghapus semua riwayat pesanan?")) return;
+        localStorage.removeItem("kopi_gans_orders");
+        renderHistory();
+        showBanner("🗑️ Semua riwayat pesanan telah dihapus.", "success");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        renderBijiRows();
+        renderMenuRows();
+        renderHistory();
+      });
+    </script>
+  </body>
+</html>

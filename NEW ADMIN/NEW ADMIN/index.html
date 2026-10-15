@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kopi Gans</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,700;1,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="css/style.css" />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <script src="src/app.js"></script>
+
+    <style>
+      /* MODAL LOGIN */
+      #login-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 9998;
+        backdrop-filter: blur(4px);
+      }
+      #login-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.92);
+        z-index: 9999;
+        background: #111;
+        border: 1px solid #2a2a2a;
+        border-radius: 14px;
+        padding: 2.5rem 2.8rem 2.2rem;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+        opacity: 0;
+        transition:
+          opacity 0.25s ease,
+          transform 0.25s ease;
+      }
+      #login-modal.show {
+        display: block;
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      #login-overlay.show {
+        display: block;
+      }
+      .login-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+      .login-modal-header h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #fff;
+      }
+      .login-modal-header h2 span {
+        color: var(--primary);
+      }
+      #login-modal-close {
+        background: none;
+        border: none;
+        color: #666;
+        font-size: 1.8rem;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0;
+        transition: color 0.2s;
+      }
+      #login-modal-close:hover {
+        color: #fff;
+      }
+      .login-field {
+        margin-bottom: 1.4rem;
+      }
+      .login-field label {
+        display: block;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #aaa;
+        margin-bottom: 0.5rem;
+      }
+      .login-field input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 7px;
+        color: #fff;
+        font-size: 1.1rem;
+        font-family: "Poppins", sans-serif;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+      }
+      .login-field input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+      #login-error {
+        font-size: 1rem;
+        color: #f08080;
+        min-height: 1.4rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+      #login-submit {
+        width: 100%;
+        padding: 0.9rem;
+        background: var(--primary);
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        font-family: "Poppins", sans-serif;
+        transition: background 0.2s;
+      }
+      #login-submit:hover {
+        background: #9c7143;
+      }
+      .login-hint {
+        margin-top: 1.2rem;
+        text-align: center;
+        font-size: 0.95rem;
+        color: #555;
+      }
+
+      /* CART DINAMIS */
+      .cart-empty {
+        padding: 1.5rem;
+        text-align: center;
+        color: #888;
+        font-size: 1rem;
+      }
+      .cart-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #222;
+        margin-top: 0.5rem;
+      }
+      .cart-total-row strong {
+        color: #fff;
+        font-size: 1.1rem;
+      }
+      .cart-clear-btn {
+        background: #d9534f;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 0.4rem 1rem;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-family: "Poppins", sans-serif;
+      }
+      .item-meta {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+      }
+      .item-unit-price,
+      .item-total-price,
+      .item-times,
+      .item-equals {
+        color: #222;
+        font-size: 0.95rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .item-unit-price {
+        color: #666;
+      }
+      .item-times,
+      .item-equals {
+        color: #444;
+      }
+      .qty-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+      }
+      .qty-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #222;
+        color: #fff;
+        font-size: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .qty-btn:hover {
+        background: var(--primary);
+      }
+      .qty-value {
+        width: 36px;
+        min-height: 36px;
+        text-align: center;
+        font-weight: 700;
+        color: #222;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .cart-item-count {
+        color: #aaa;
+        font-size: 0.85rem;
+        margin-top: 0.2rem;
+      }
+      .cart-subtotal-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0;
+        background: #f1f1f1;
+        color: #111;
+        border-radius: 8px;
+        font-weight: 700;
+      }
+      .cart-subtotal-row span {
+        color: #666;
+        font-weight: 600;
+      }
+      .cart-checkout-btn {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 700;
+        font-family: "Poppins", sans-serif;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 0.5rem;
+      }
+      .cart-checkout-btn:hover {
+        background: #9c7143;
+      }
+
+      /* TOMBOL ADD TO CART DI MENU */
+      .menu-add-btn {
+        display: inline-block;
+        margin-top: 0.6rem;
+        padding: 0.4rem 1.2rem;
+        background: var(--primary);
+        color: #fff;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s;
+      }
+      .menu-add-btn:hover {
+        background: #9c7143;
+      }
+    </style>
+  </head>
+  <body>
+    <!--navbar-->
+    <nav class="navbar" x-data>
+      <a href="#" class="navbar-logo">Kopi<span>Gans</span>.</a>
+
+      <div class="navbar-nav">
+        <a href="#">Home</a>
+        <a href="#about">Tentang Kami</a>
+        <a href="#menu">Menu</a>
+        <a href="#products">Products</a>
+      </div>
+
+      <div class="navbar-extra">
+        <a href="#" id="search-button"><i data-feather="search"></i></a>
+        <a href="#" id="shopping-cart-bottom" aria-label="Keranjang belanja">
+          <span class="cart-icon" aria-hidden="true">🛒</span>
+          <span
+            class="quantity-badge"
+            x-show="$store.cart.quantity > 0"
+            x-text="$store.cart.quantity"
+            >0</span
+          >
+        </a>
+        <a href="admin.html" id="admin-nav-link"><i data-feather="lock"></i></a>
+        <a href="#" id="hamburger-menu"><i data-feather="menu"></i></a>
+      </div>
+
+      <div class="search-form">
+        <input type="search" id="search-box" placeholder="search here...." />
+        <label for="search-box"><i data-feather="search"></i></label>
+      </div>
+
+      <!-- shopping cart dropdown — DINAMIS -->
+      <div class="shopping-cart" x-data>
+        <template x-if="$store.cart.items.length === 0">
+          <p class="cart-empty">Keranjang masih kosong</p>
+        </template>
+
+        <template
+          x-for="item in $store.cart.items"
+          :key="item.id + '-' + item.source"
+        >
+          <div class="cart-item">
+            <img
+              :src="getMenuImagePath(item)"
+              :alt="item.name"
+            />
+            <div class="item-detail">
+              <h3 x-text="item.name"></h3>
+              <div class="item-meta">
+                <span
+                  class="item-unit-price"
+                  x-text="rupiah(item.price)"
+                ></span>
+                <span class="item-times">×</span>
+                <div class="qty-controls">
+                  <button
+                    class="qty-btn"
+                    @click.prevent="$store.cart.decrement(item.id, item.source)"
+                  >
+                    −
+                  </button>
+                  <span class="qty-value" x-text="item.qty"></span>
+                  <button
+                    class="qty-btn"
+                    @click.prevent="$store.cart.increment(item.id, item.source)"
+                  >
+                    +
+                  </button>
+                </div>
+                <span class="item-equals">=</span>
+                <span
+                  class="item-total-price"
+                  x-text="rupiah(item.price * item.qty)"
+                ></span>
+              </div>
+            </div>
+            <i
+              data-feather="trash-2"
+              class="romove-item"
+              style="cursor: pointer"
+              @click="$store.cart.remove(item.id, item.source); $nextTick(() => feather.replace())"
+            ></i>
+          </div>
+        </template>
+
+        <template x-if="$store.cart.items.length > 0">
+          <div>
+            <div class="cart-total-row">
+              <div>
+                <strong x-text="`Total: ${rupiah($store.cart.total)}`"></strong>
+                <div
+                  class="cart-item-count"
+                  x-text="`${$store.cart.quantity} barang`"
+                ></div>
+              </div>
+              <button class="cart-clear-btn" @click="$store.cart.clear()">
+                Kosongkan
+              </button>
+            </div>
+            <div class="cart-subtotal-row">
+              <span>Total harga semua item</span>
+              <strong x-text="rupiah($store.cart.total)"></strong>
+            </div>
+            <div style="padding: 0 1.5rem 1.5rem">
+              <button class="cart-checkout-btn" @click="goCheckout()">
+                Proses Pesanan →
+              </button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </nav>
+
+    <!--Hero-->
+    <section class="hero" id="home">
+      <main class="content">
+        <h1>Nikmati Secangkir <span>Kopi</span></h1>
+        <p>Cah ngganteng sarapane Kopi Gans</p>
+      </main>
+    </section>
+
+    <!-- about -->
+    <section id="about" class="about">
+      <h2><span>Tentang</span> Kami</h2>
+      <div class="row">
+        <div class="about-img">
+          <img src="img/Tentang-Kami.jpg" alt="Tentang Kami" />
+        </div>
+        <div class="content">
+          <h3>Kenapa Harus Memilih Kopi Kami?</h3>
+          <p>
+            KopiGans hadir untuk menjadi energi di balik ide-ide besar Anda.
+            Dengan suasana yang nyaman dan kopi berkualitas tinggi, kami
+            menciptakan ruang di mana kreativitas bisa mengalir tanpa batas—baik
+            saat Anda bekerja sendiri maupun berkumpul bersama rekan sejawat.
+          </p>
+          <p>
+            Kami tidak pernah berkompromi soal rasa. Menggunakan mesin
+            berstandar internasional dan biji specialty grade, kami menjamin
+            setiap cangkir yang sampai ke tangan Anda adalah bentuk dedikasi
+            kami terhadap seni seduh kopi yang sesungguhnya.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         MENU — Dinamis Alpine, gambar dari img/menu/
+         ══════════════════════════════════════════ -->
+    <section id="menu" class="menu" x-data="menuSection">
+      <h2><span>Menu</span> Kami</h2>
+      <p>
+        Nikmati harmoni aroma dan kesegaran biji kopi specialty yang diseduh
+        fresh setiap hari untuk menemani momen Anda.
+      </p>
+
+      <div class="row">
+        <template x-for="item in menuItems" :key="item.id">
+          <div class="menu-card">
+            <img
+              :src="getMenuImage(item)"
+              :alt="item.name"
+              class="menu-card-img"
+            />
+            <h3 class="menu-card-title" x-text="`- ${item.name} -`"></h3>
+            <p
+              class="menu-card-price"
+              x-text="rupiah(getPrice(item.id, item.price))"
+            ></p>
+            <p
+              class="menu-card-status"
+              :class="getStock(item.id, 10) > 0 ? 'badge-available' : 'badge-habis'"
+              x-text="getStock(item.id, 10) > 0 ? 'Tersedia' : 'Habis'"
+            ></p>
+            <a
+              href="#"
+              class="menu-add-btn"
+              x-show="getStock(item.id, 10) > 0"
+              @click.prevent="$store.cart.addMenu({ ...item, price: getPrice(item.id, item.price) })"
+            >
+              + Keranjang
+            </a>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- products -->
+    <section id="products" class="products" x-data="products">
+      <h2><span>Produk Unggulan</span> Kami</h2>
+      <p>
+        Bawa pulang keajaiban rasa dari biji kopi pilihan. Koleksi specialty
+        beans kami dikurasi khusus untuk Anda.
+      </p>
+
+      <div class="row">
+        <template x-for="(item, index) in items" :key="index">
+          <div class="product-card">
+            <div class="product-icons">
+              <a
+                href="#"
+                :class="{ 'invisible-icon': getStock(item.id, item.stock) <= 0 }"
+                @click.prevent="$store.cart.add({ ...item, price: getPrice(item.id, item.price) })"
+              >
+                <span class="cart-icon" aria-hidden="true">🛒</span>
+              </a>
+            </div>
+            <div class="product-image">
+              <img :src="`img/products/${item.img}`" :alt="item.name" />
+            </div>
+            <div class="product-content">
+              <h3 x-text="item.name"></h3>
+              <div class="product-stars">
+                <i data-feather="star" class="star"></i>
+                <i data-feather="star" class="star"></i>
+                <i data-feather="star" class="star"></i>
+                <i data-feather="star" class="star"></i>
+                <i data-feather="star" class="star"></i>
+              </div>
+              <div class="product-price">
+                <span x-text="rupiah(getPrice(item.id, item.price))"></span>
+              </div>
+              <p
+                class="product-stock"
+                x-text="`Stok: ${getStock(item.id, item.stock)}`"
+              ></p>
+              <p
+                class="product-status"
+                :class="getStock(item.id, item.stock) > 0 ? 'badge-available' : 'badge-habis'"
+                x-text="getStock(item.id, item.stock) > 0 ? 'Tersedia' : 'Habis'"
+              ></p>
+            </div>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- footer -->
+    <footer>
+      <div class="social">
+        <a href="#"><i data-feather="instagram"></i></a>
+        <a href="#"><i data-feather="twitter"></i></a>
+        <a href="#"><i data-feather="facebook"></i></a>
+      </div>
+      <div class="links">
+        <a href="#home">Home</a>
+        <a href="#about">Tentang kami</a>
+        <a href="#menu">Menu</a>
+      </div>
+      <div class="credit">
+        <p>Created by <a href="">Kelvin Gans</a>. | &copy; 2026.</p>
+      </div>
+    </footer>
+
+    <!-- modal item detail -->
+    <div class="modal" id="item-detail-modal">
+      <div class="modal-container">
+        <a href="#" class="close-icon"><i data-feather="x"></i></a>
+        <div class="modal-content">
+          <img src="img/products/1.jpg" alt="Product 1" />
+          <div class="product-content">
+            <h3>Product 1</h3>
+            <p>Bawa pulang keajaiban rasa dari biji kopi pilihan. Koleksi specialty
+              beans kami dikurasi khusus untuk Anda.</p>
+            <div class="product-stars">
+              <i data-feather="star" class="star-full"></i>
+              <i data-feather="star" class="star-full"></i>
+              <i data-feather="star" class="star-full"></i>
+              <i data-feather="star" class="star-full"></i>
+              <i data-feather="star"></i>
+            </div>
+            <div class="product-price">IDR 30K <span>IDR 55K</span></div>
+            <a href="#"
+              ><i data-feather="shopping-cart"></i> <span>add to cart</span></a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL LOGIN -->
+    <div id="login-overlay"></div>
+    <div id="login-modal" role="dialog" aria-modal="true">
+      <div class="login-modal-header">
+        <h2>Login <span>Admin</span></h2>
+        <button id="login-modal-close" aria-label="Tutup">&times;</button>
+      </div>
+      <div class="login-field">
+        <label for="login-username">Username</label>
+        <input
+          type="text"
+          id="login-username"
+          placeholder="Masukkan username"
+          autocomplete="username"
+        />
+      </div>
+      <div class="login-field">
+        <label for="login-password">Password</label>
+        <input
+          type="password"
+          id="login-password"
+          placeholder="Masukkan password"
+          autocomplete="current-password"
+        />
+      </div>
+      <p id="login-error"></p>
+      <button id="login-submit">🔐 Masuk sebagai Admin</button>
+      <p class="login-hint">Demo: admin / admin123</p>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.feather && typeof feather.replace === "function") {
+          try {
+            feather.replace();
+          } catch (error) {
+            console.warn("Feather replace failed:", error);
+          }
+        }
+      });
+    </script>
+    <script>
+      function goCheckout() {
+        const items = Alpine.store("cart").items;
+        if (!items.length) return;
+        sessionStorage.setItem(
+          "kopi_gans_checkout_cart",
+          JSON.stringify(items),
+        );
+        location.href = "checkout.html";
+      }
+    </script>
+    <script src="js/script.js"></script>
+  </body>
+</html>

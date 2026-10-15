@@ -1,0 +1,1166 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Proses Pesanan — Kopi Gans</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #b6895b;
+        --primary-dark: #8c6540;
+        --bg: #010101;
+        --card-bg: #0e0c0a;
+        --border: #2a1f14;
+        --text-muted: #666;
+        --text-dim: #aaa;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        outline: none;
+        border: none;
+        text-decoration: none;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: var(--bg);
+        color: #fff;
+        min-height: 100vh;
+      }
+
+      /* Atmospheric bg */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 70% 50% at 10% 90%,
+            rgba(182, 137, 91, 0.1) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 40% at 90% 10%,
+            rgba(182, 137, 91, 0.06) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* ── Navbar ── */
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.4rem 7%;
+        background-color: rgba(1, 1, 1, 0.85);
+        border-bottom: 1px solid var(--border);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        backdrop-filter: blur(8px);
+      }
+
+      .navbar-logo {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+        font-style: italic;
+      }
+
+      .navbar-logo span {
+        color: var(--primary);
+      }
+
+      .back-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-dim);
+        font-size: 1.1rem;
+        transition: color 0.2s;
+      }
+
+      .back-link:hover {
+        color: var(--primary);
+      }
+
+      /* ── Layout ── */
+      .page-wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 10rem 2rem 5rem;
+      }
+
+      .page-title {
+        font-family: "Playfair Display", serif;
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+      }
+
+      .page-title span {
+        color: var(--primary);
+      }
+
+      .page-subtitle {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin-bottom: 3rem;
+        letter-spacing: 0.05em;
+      }
+
+      /* Steps indicator */
+      .steps {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 3.5rem;
+      }
+
+      .step {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      .step.active {
+        color: var(--primary);
+      }
+      .step.done {
+        color: #5dd879;
+      }
+
+      .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid currentColor;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .step.done .step-num {
+        background: #5dd879;
+        border-color: #5dd879;
+        color: #000;
+      }
+
+      .step.active .step-num {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+      }
+
+      .step-line {
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+        margin: 0 1rem;
+        max-width: 60px;
+      }
+
+      /* ── Grid layout ── */
+      .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 2rem;
+        align-items: start;
+      }
+
+      @media (max-width: 768px) {
+        .checkout-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Card ── */
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 2rem 2.2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .card-title {
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--primary);
+        margin-bottom: 1.6rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      /* ── Form ── */
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+      }
+
+      @media (max-width: 500px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .form-group {
+        margin-bottom: 1.4rem;
+      }
+
+      .form-group.full {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        display: block;
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+      }
+
+      input[type="text"],
+      input[type="tel"],
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 5px;
+        color: #fff;
+        font-family: "Poppins", sans-serif;
+        font-size: 0.95rem;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        appearance: none;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(182, 137, 91, 0.1);
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #333;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+        cursor: pointer;
+      }
+
+      select option {
+        background: #111;
+      }
+
+      /* ── Metode pembayaran ── */
+      .payment-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+        margin-bottom: 1.4rem;
+      }
+
+      .pay-opt {
+        position: relative;
+        cursor: pointer;
+      }
+
+      .pay-opt input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .pay-opt-label {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.9rem 1rem;
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 6px;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .pay-opt-label .pay-icon {
+        font-size: 1.3rem;
+      }
+
+      .pay-opt input:checked + .pay-opt-label {
+        border-color: var(--primary);
+        background: rgba(182, 137, 91, 0.08);
+        color: var(--primary);
+      }
+
+      .pay-opt-label:hover {
+        border-color: var(--primary);
+      }
+
+      /* ── Order Summary (kanan) ── */
+      .order-items {
+        max-height: 320px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+
+      .order-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .order-item:last-child {
+        border-bottom: none;
+      }
+
+      .order-item img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 1px solid var(--border);
+      }
+
+      .order-item-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .order-item-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .order-item-qty {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: 0.15rem;
+      }
+
+      .order-item-price {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--primary);
+        flex-shrink: 0;
+      }
+
+      /* Empty cart state */
+      .empty-cart {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+      }
+
+      .empty-cart a {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      /* ── Totals ── */
+      .order-totals {
+        margin-top: 1.2rem;
+        padding-top: 1.2rem;
+        border-top: 1px solid var(--border);
+      }
+
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.6rem;
+        font-size: 0.9rem;
+        color: var(--text-dim);
+      }
+
+      .total-row.grand {
+        margin-top: 0.8rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid var(--border);
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .total-row.grand span:last-child {
+        color: var(--primary);
+      }
+
+      /* ── Submit btn ── */
+      .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        margin-top: 1.5rem;
+        background: var(--primary);
+        color: #fff;
+        font-family: "Poppins", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: 6px;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          transform 0.1s;
+        position: relative;
+      }
+
+      .btn-submit:hover {
+        background: var(--primary-dark);
+      }
+      .btn-submit:active {
+        transform: scale(0.98);
+      }
+      .btn-submit:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-submit .spinner {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        margin: 0 auto;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .btn-submit.loading .btn-text {
+        display: none;
+      }
+      .btn-submit.loading .spinner {
+        display: block;
+      }
+
+      /* ── Error msg ── */
+      .form-error {
+        display: none;
+        background: #1e0a0a;
+        border: 1px solid #5c1a1a;
+        color: #f08080;
+        font-size: 0.82rem;
+        padding: 0.7rem 1rem;
+        border-radius: 5px;
+        margin-top: 1rem;
+      }
+
+      .form-error.show {
+        display: block;
+      }
+
+      /* ── SUCCESS SCREEN ── */
+      #success-screen {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      #success-screen.show {
+        display: flex;
+      }
+
+      .success-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      @keyframes popIn {
+        from {
+          transform: scale(0.3);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .success-title {
+        font-family: "Playfair Display", serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        animation: fadeUp 0.5s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      .success-title span {
+        color: var(--primary);
+      }
+
+      .receipt-panel {
+        width: min(540px, 100%);
+        background: #fff;
+        color: #111;
+        border-radius: 1.25rem;
+        padding: 2rem;
+        text-align: left;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+      }
+
+      .receipt-title {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+      }
+
+      .receipt-subtitle {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 1.4rem;
+      }
+
+      .receipt-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .receipt-meta span {
+        color: #555;
+      }
+
+      .receipt-item,
+      .line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .receipt-item {
+        border-bottom: 1px dashed #ddd;
+        padding: 0.75rem 0;
+        color: #222;
+      }
+
+      .receipt-item:last-child {
+        border-bottom: none;
+      }
+
+      .receipt-summary {
+        margin-top: 1rem;
+        border-top: 1px solid #eee;
+        padding-top: 1rem;
+      }
+
+      .line.total {
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+
+      .receipt-note {
+        margin-top: 1.4rem;
+        font-size: 0.95rem;
+        color: #555;
+      }
+
+      .btn-print {
+        padding: 0.85rem 1.8rem;
+        background: #222;
+        color: #fff;
+        font-family: "Poppins", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        border: none;
+        transition: background 0.2s;
+      }
+
+      .btn-print:hover {
+        background: #111;
+      }
+
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+
+        #success-screen,
+        #success-screen * {
+          visibility: visible;
+        }
+
+        #success-screen {
+          position: static;
+          background: #fff;
+          padding: 0;
+        }
+
+        .success-actions {
+          display: none;
+        }
+
+        .receipt-panel {
+          box-shadow: none;
+          width: 100%;
+          border-radius: 0;
+          padding: 0;
+        }
+      }
+
+      .success-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        animation: fadeUp 0.5s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      .btn-home {
+        padding: 0.85rem 2.2rem;
+        background: var(--primary);
+        color: #fff;
+        font-family: "Poppins", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border: none;
+      }
+
+      .btn-home:hover {
+        background: var(--primary-dark);
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ── Divider ── */
+      .ornament {
+        width: 40px;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--primary),
+          transparent
+        );
+        margin: 1rem auto 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <a href="index.html" class="navbar-logo">Kopi<span>Gans</span>.</a>
+      <a href="index.html" class="back-link">← Kembali ke Menu</a>
+    </nav>
+
+    <!-- Main -->
+    <div class="page-wrap">
+      <h1 class="page-title">Proses <span>Pesanan</span></h1>
+      <p class="page-subtitle">
+        Lengkapi data di bawah untuk menyelesaikan pesananmu
+      </p>
+      <div class="ornament"></div>
+
+      <!-- Steps -->
+      <div class="steps">
+        <div class="step done" id="step1">
+          <div class="step-num">✓</div>
+          <span>Keranjang</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step active" id="step2">
+          <div class="step-num">2</div>
+          <span>Detail Pesanan</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step3">
+          <div class="step-num">3</div>
+          <span>Konfirmasi</span>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div class="checkout-grid">
+        <!-- KIRI: Form -->
+        <div>
+          <!-- Data Pembeli -->
+          <div class="card" style="margin-bottom: 1.5rem">
+            <p class="card-title">Data Pembeli</p>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="nama">Nama Lengkap *</label>
+                <input type="text" id="nama" placeholder="Nama kamu" />
+              </div>
+              <div class="form-group">
+                <label for="telepon">No. Telepon</label>
+                <input type="tel" id="telepon" placeholder="08xx-xxxx-xxxx" />
+              </div>
+              <div class="form-group full">
+                <label for="tipe-pesanan">Tipe Pesanan *</label>
+                <select id="tipe-pesanan">
+                  <option value="">— Pilih tipe pesanan —</option>
+                  <option value="dine-in">Minum di Tempat</option>
+                  <option value="takeaway">Bawa Pulang</option>
+                </select>
+              </div>
+              <div
+                class="form-group full"
+                id="meja-group"
+                style="display: none"
+              >
+                <label for="meja">Nomor Meja</label>
+                <input type="text" id="meja" placeholder="Contoh: Meja 5" />
+              </div>
+              <div class="form-group full">
+                <label for="catatan">Catatan Tambahan</label>
+                <textarea
+                  id="catatan"
+                  placeholder="Contoh: tanpa es, sedikit gula, dll."
+                  style="min-height: 60px"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metode Pembayaran -->
+          <div class="card">
+            <p class="card-title">Metode Pembayaran</p>
+            <div class="payment-options">
+              <label class="pay-opt">
+                <input type="radio" name="payment" value="cash" checked />
+                <span class="pay-opt-label"
+                  ><span class="pay-icon">💵</span> Tunai</span
+                >
+              </label>
+              <label class="pay-opt">
+                <input type="radio" name="payment" value="qris" />
+                <span class="pay-opt-label"
+                  ><span class="pay-icon">📱</span> QRIS</span
+                >
+              </label>
+              <label class="pay-opt">
+                <input type="radio" name="payment" value="transfer" />
+                <span class="pay-opt-label"
+                  ><span class="pay-icon">🏦</span> Transfer Bank</span
+                >
+              </label>
+              <label class="pay-opt">
+                <input type="radio" name="payment" value="debit" />
+                <span class="pay-opt-label"
+                  ><span class="pay-icon">💳</span> Kartu Debit</span
+                >
+              </label>
+            </div>
+
+            <div class="form-error" id="form-error">
+              Mohon lengkapi semua field yang wajib diisi.
+            </div>
+
+            <button class="btn-submit" id="btn-submit" onclick="submitOrder()">
+              <span class="btn-text">☕ Konfirmasi Pesanan</span>
+              <div class="spinner"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- KANAN: Ringkasan Pesanan -->
+        <div class="card" id="order-summary">
+          <p class="card-title">Ringkasan Pesanan</p>
+
+          <div class="order-items" id="order-items-list">
+            <!-- Diisi JS -->
+          </div>
+
+          <div class="order-totals" id="order-totals">
+            <!-- Diisi JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS SCREEN -->
+    <div id="success-screen">
+      <div class="receipt-panel">
+        <div class="receipt-title">KOPI GANS</div>
+        <div class="receipt-subtitle">Koleksi Kopi Kualitas Unggulan</div>
+
+        <div class="receipt-meta">
+          <div>
+            <span>Pelanggan:</span>
+            <strong id="receipt-name"></strong>
+          </div>
+          <div>
+            <span>Tipe Pesanan:</span>
+            <strong id="receipt-type"></strong>
+          </div>
+          <div>
+            <span>Tanggal:</span>
+            <strong id="receipt-date"></strong>
+          </div>
+          <div>
+            <span>No. Pesanan:</span>
+            <strong id="receipt-order-id"></strong>
+          </div>
+        </div>
+
+        <div class="receipt-items" id="receipt-items"></div>
+        <div class="receipt-summary" id="receipt-summary"></div>
+        <div class="receipt-note" id="receipt-note"></div>
+      </div>
+
+      <div class="success-actions">
+        <button class="btn-home" onclick="goHome()">Keluar</button>
+      </div>
+    </div>
+
+    <script>
+      // ── Format Rupiah ──
+      const rupiah = (n) =>
+        new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
+        }).format(n);
+
+      // ── Ambil cart dari sessionStorage ──
+      let cartItems = [];
+      try {
+        const raw = sessionStorage.getItem("kopi_gans_checkout_cart");
+        if (raw) cartItems = JSON.parse(raw);
+      } catch (e) {}
+
+      // ── Render ringkasan pesanan ──
+      function renderSummary() {
+        const listEl = document.getElementById("order-items-list");
+        const totalsEl = document.getElementById("order-totals");
+
+        if (!cartItems.length) {
+          listEl.innerHTML = `<div class="empty-cart">Keranjang kosong.<br><a href="index.html">← Kembali ke menu</a></div>`;
+          totalsEl.innerHTML = "";
+          document.getElementById("btn-submit").disabled = true;
+          return;
+        }
+
+        listEl.innerHTML = cartItems
+          .map((item) => {
+            const stock = Number(window.stock?.[item.id] ?? 10);
+            const slugify = (value) =>
+              String(value || "")
+                .toLowerCase()
+                .replace(/&/g, " and ")
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "");
+            const soldMap = {
+              americano: "sold-amerikano.png",
+              "cafe-au-lait": "sold-cafe-au-lait.png",
+              cappuccino: "sold-cappuccino.png",
+              "cold-brew": "sold-cold-brew.png",
+              espresso: "sold-espreso.png",
+              "flat-white": "sold-flat-white.png",
+              "long-black": "sold-long-black.png",
+              macchiato: "sold-macchiato.png",
+              mocha: "sold-mocha.png",
+            };
+            const imgPath =
+              item.source === "menu" && stock <= 0
+                ? `img/menu-sold/${soldMap[slugify(item.name || item.img)] || `sold-${slugify(item.name || item.img)}.png`}`
+                : item.source === "menu"
+                  ? `img/menu/${item.img}`
+                  : `img/products/${item.img}`;
+            return `
+          <div class="order-item">
+            <img src="${imgPath}" alt="${item.name}" onerror="this.style.display='none'" />
+            <div class="order-item-info">
+              <div class="order-item-name">${item.name}</div>
+              <div class="order-item-qty">× ${item.qty} &nbsp;·&nbsp; ${rupiah(item.price)} / item</div>
+            </div>
+            <div class="order-item-price">${rupiah(item.price * item.qty)}</div>
+          </div>`;
+          })
+          .join("");
+
+        const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
+        const total = subtotal;
+
+        totalsEl.innerHTML = `
+        <div class="total-row">
+          <span>Subtotal (${cartItems.reduce((s, i) => s + i.qty, 0)} item)</span>
+          <span>${rupiah(subtotal)}</span>
+        </div>
+        <div class="total-row grand">
+          <span>Total Pembayaran</span>
+          <span>${rupiah(total)}</span>
+        </div>`;
+      }
+
+      renderSummary();
+
+      // ── Tipe pesanan → tampilkan/sembunyikan field meja ──
+      document
+        .getElementById("tipe-pesanan")
+        .addEventListener("change", function () {
+          const val = this.value;
+          document.getElementById("meja-group").style.display =
+            val === "dine-in" ? "block" : "none";
+          renderSummary();
+        });
+
+      // ── Submit ──
+      function submitOrder() {
+        const nama = document.getElementById("nama").value.trim();
+        const telp = document.getElementById("telepon").value.trim();
+        const tipe = document.getElementById("tipe-pesanan").value;
+        const errEl = document.getElementById("form-error");
+        const btnEl = document.getElementById("btn-submit");
+
+        // Validasi
+        if (!nama || !tipe) {
+          errEl.textContent =
+            "Mohon lengkapi nama dan tipe pesanan.";
+          errEl.classList.add("show");
+          return;
+        }
+
+        if (!cartItems.length) {
+          errEl.textContent = "Keranjang kamu kosong.";
+          errEl.classList.add("show");
+          return;
+        }
+
+        errEl.classList.remove("show");
+
+        // Loading state
+        btnEl.classList.add("loading");
+        btnEl.disabled = true;
+
+        setTimeout(() => {
+          // Generate order ID
+          const orderId = "KG-" + Date.now().toString(36).toUpperCase();
+
+          const catatan = document.getElementById("catatan").value.trim();
+          const meja = document.getElementById("meja").value.trim();
+          const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
+          const total = subtotal;
+
+          // Simpan ke localStorage sebagai riwayat (opsional)
+          try {
+            const payment = document.querySelector(
+              'input[name="payment"]:checked',
+            ).value;
+
+            const order = {
+              id: orderId,
+              nama,
+              telp,
+              tipe,
+              meja,
+              catatan,
+              payment,
+              items: cartItems,
+              subtotal,
+              total,
+              createdAt: new Date().toISOString(),
+              status: "pending",
+            };
+
+            const existing = JSON.parse(
+              localStorage.getItem("kopi_gans_orders") || "[]",
+            );
+            existing.unshift(order);
+            localStorage.setItem(
+              "kopi_gans_orders",
+              JSON.stringify(existing.slice(0, 50)),
+            );
+
+            // ── Kurangi stok semua item di pesanan
+            // Produk dan menu sama-sama berkurang berdasarkan qty
+            const stock = JSON.parse(
+              localStorage.getItem("kopi_gans_stock") || "{}",
+            );
+            cartItems.forEach((item) => {
+              const current = Number(stock[item.id] ?? 10);
+              stock[item.id] = Math.max(0, current - item.qty);
+            });
+            localStorage.setItem("kopi_gans_stock", JSON.stringify(stock));
+          } catch (e) {}
+
+          // Bersihkan cart di sessionStorage
+          sessionStorage.removeItem("kopi_gans_checkout_cart");
+
+          // Tampilkan success screen
+          const tipeLabel =
+            {
+              "dine-in": "Minum di Tempat",
+              takeaway: "Bawa Pulang",
+            }[tipe] || tipe;
+          const createdAt = new Date();
+          document.getElementById("receipt-name").textContent = nama;
+          document.getElementById("receipt-type").textContent = tipeLabel;
+          document.getElementById("receipt-date").textContent =
+            createdAt.toLocaleString("id-ID", {
+              day: "numeric",
+              month: "numeric",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          document.getElementById("receipt-order-id").textContent = orderId;
+          document.getElementById("receipt-items").innerHTML = cartItems
+            .map(
+              (item) =>
+                `<div class="receipt-item"><span>${item.name} x${item.qty}</span><span>${rupiah(
+                  item.price * item.qty,
+                )}</span></div>`,
+            )
+            .join("");
+          document.getElementById("receipt-summary").innerHTML = `
+            <div class="line total">
+              <span>TOTAL AKHIR</span>
+              <strong>${rupiah(total)}</strong>
+            </div>`;
+          document.getElementById("receipt-note").textContent =
+            `* Catatan: ${catatan || "-"}`;
+          document.getElementById("success-screen").classList.add("show");
+        }, 1500);
+      }
+
+      function printReceipt() {
+        const receiptElement = document.querySelector(".receipt-panel");
+        if (!receiptElement) return;
+
+        const printWindow = window.open("", "_blank", "width=900,height=700");
+        if (!printWindow) return;
+
+        const styles = Array.from(
+          document.querySelectorAll('style, link[rel="stylesheet"]'),
+        )
+          .map((node) => node.outerHTML)
+          .join("");
+
+        printWindow.document.write(`<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Struk Kopi Gans</title>
+  ${styles}
+  <style>
+    body {
+      margin: 0;
+      padding: 1.5rem;
+      background: #fff;
+      color: #111;
+      font-family: Inter, Arial, sans-serif;
+    }
+    .receipt-panel {
+      max-width: 680px;
+      margin: 0 auto;
+      box-shadow: none;
+      border-radius: 0;
+      padding: 0;
+    }
+    .receipt-item,
+    .line {
+      border-bottom: 1px dashed #ddd;
+      padding: 0.75rem 0;
+    }
+    .receipt-item:last-child,
+    .line.total {
+      border-bottom: none;
+    }
+    .success-actions {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  ${receiptElement.outerHTML}
+</body>
+</html>`);
+
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+      }
+
+      function goHome() {
+        location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

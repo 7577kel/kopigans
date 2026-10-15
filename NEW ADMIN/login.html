@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Admin — Kopi Gans</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #b6895b;
+      --primary-dark: #8c6540;
+      --bg: #010101;
+      --card-bg: #0e0c0a;
+      --border: #2a1f14;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      outline: none;
+      border: none;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Atmospheric background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 80%, rgba(182, 137, 91, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(182, 137, 91, 0.07) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Grain overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    .login-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: 3rem 3rem 3.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow:
+        0 0 0 1px rgba(182,137,91,0.08),
+        0 30px 80px rgba(0,0,0,0.7),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+      animation: cardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 2.8rem;
+    }
+
+    .brand-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+      font-style: italic;
+    }
+
+    .brand-logo span {
+      color: var(--primary);
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #555;
+      margin-top: 0.3rem;
+    }
+
+    /* Divider */
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      margin: 1rem auto 0;
+    }
+
+    .form-group {
+      margin-bottom: 1.4rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 0.9rem 1rem 0.9rem 2.8rem;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 4px;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(182,137,91,0.1);
+    }
+
+    .input-wrap input::placeholder {
+      color: #333;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #444;
+      font-size: 0.9rem;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+
+    .input-wrap:focus-within .input-icon {
+      color: var(--primary);
+    }
+
+    /* Show/hide password */
+    .eye-btn {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #444;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .eye-btn:hover { color: var(--primary); }
+
+    .btn-login {
+      width: 100%;
+      padding: 0.95rem;
+      margin-top: 0.5rem;
+      background: var(--primary);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-login:active {
+      transform: scale(0.98);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Loading spinner inside button */
+    .btn-login .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .btn-login.loading .btn-text { display: none; }
+    .btn-login.loading .spinner { display: block; }
+
+    /* Error message */
+    .error-msg {
+      display: none;
+      background: #1e0a0a;
+      border: 1px solid #5c1a1a;
+      color: #f08080;
+      font-size: 0.8rem;
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      margin-bottom: 1.2rem;
+      text-align: center;
+      animation: shake 0.3s ease;
+    }
+
+    .error-msg.show { display: block; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.78rem;
+      color: #444;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover { color: var(--primary); }
+
+    /* Coffee steam decoration */
+    .deco {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      opacity: 0.06;
+      font-size: 8rem;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-logo">Kopi <span>Gans</span></div>
+      <div class="brand-sub">Admin Panel</div>
+      <div class="divider"></div>
+    </div>
+
+    <div class="error-msg" id="error-msg">Username atau password salah.</div>
+
+    <div class="form-group">
+      <label for="username">Username</label>
+      <div class="input-wrap">
+        <span class="input-icon">👤</span>
+        <input type="text" id="username" placeholder="Masukkan username" autocomplete="username" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="password" placeholder="Masukkan password" autocomplete="current-password" />
+        <button class="eye-btn" id="eye-btn" type="button" onclick="togglePass()" title="Tampilkan/sembunyikan">👁</button>
+      </div>
+    </div>
+
+    <button class="btn-login" id="btn-login" onclick="doLogin()">
+      <span class="btn-text">Masuk</span>
+      <div class="spinner"></div>
+    </button>
+
+    <a href="index.html" class="back-link">← Kembali ke halaman utama</a>
+  </div>
+
+  <div class="deco">☕</div>
+
+  <script>
+    // ─── KONFIGURASI AKUN ─────────────────────────────────────────
+    // Ganti username & password sesuai kebutuhan
+    const ACCOUNTS = [
+      { username: "admin",  password: "admin123", role: "admin",  name: "Admin",  redirect: "admin.html"  },
+      { username: "kasir",  password: "kasir123", role: "kasir",  name: "Kasir",  redirect: "kasir.html"  },
+    ];
+    // ──────────────────────────────────────────────────────────────
+
+    const usernameEl = document.getElementById("username");
+    const passwordEl = document.getElementById("password");
+    const errorEl    = document.getElementById("error-msg");
+    const btnEl      = document.getElementById("btn-login");
+
+    // Enter key support
+    [usernameEl, passwordEl].forEach(el => {
+      el.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+    });
+
+    function togglePass() {
+      passwordEl.type = passwordEl.type === "password" ? "text" : "password";
+    }
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.classList.remove("show");
+      void errorEl.offsetWidth; // restart animation
+      errorEl.classList.add("show");
+    }
+
+    function doLogin() {
+      const username = usernameEl.value.trim();
+      const password = passwordEl.value;
+
+      if (!username || !password) {
+        showError("Isi username dan password terlebih dahulu.");
+        return;
+      }
+
+      // Simulasi loading
+      btnEl.classList.add("loading");
+      btnEl.disabled = true;
+
+      setTimeout(() => {
+        const account = ACCOUNTS.find(
+          a => a.username === username && a.password === password
+        );
+
+        if (account) {
+          // Simpan session
+          sessionStorage.setItem("kopi_gans_login", JSON.stringify({
+            role: account.role,
+            name: account.name,
+            username: account.username,
+            loginAt: Date.now(),
+          }));
+          // Redirect sesuai role
+          location.replace(account.redirect);
+        } else {
+          btnEl.classList.remove("loading");
+          btnEl.disabled = false;
+          showError("Username atau password salah.");
+          passwordEl.value = "";
+          passwordEl.focus();
+        }
+      }, 700);
+    }
+  </script>
+</body>
+</html>

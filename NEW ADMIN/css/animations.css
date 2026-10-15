@@ -1,0 +1,346 @@
+/* ══════════════════════════════════════════════════════════════
+   ANIMATIONS.CSS — Kopi Gans
+   Scroll reveals, hover effects, decorative animations
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Scroll Reveal ─────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reveal from left */
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-80px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.reveal-left.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Reveal from right */
+.reveal-right {
+  opacity: 0;
+  transform: translateX(80px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.reveal-right.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Reveal scale up */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal-scale.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── Stagger Delay for Cards ───────────────────────────────── */
+.stagger-1 { transition-delay: 0.1s !important; }
+.stagger-2 { transition-delay: 0.2s !important; }
+.stagger-3 { transition-delay: 0.3s !important; }
+.stagger-4 { transition-delay: 0.4s !important; }
+.stagger-5 { transition-delay: 0.5s !important; }
+.stagger-6 { transition-delay: 0.6s !important; }
+.stagger-7 { transition-delay: 0.7s !important; }
+.stagger-8 { transition-delay: 0.8s !important; }
+.stagger-9 { transition-delay: 0.9s !important; }
+
+/* ── Hero Floating Animation ───────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+
+.hero-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* ── Hero Text Entrance ────────────────────────────────────── */
+@keyframes heroSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.hero-animate-title {
+  animation: heroSlideIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.hero-animate-sub {
+  opacity: 0;
+  animation: heroSlideIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
+}
+
+.hero-animate-cta {
+  opacity: 0;
+  animation: heroSlideIn 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s forwards;
+}
+
+/* ── Pulse Glow for Badge "Tersedia" ───────────────────────── */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(43, 191, 113, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 12px 4px rgba(43, 191, 113, 0.25);
+  }
+}
+
+.badge-available {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+/* ── Shimmer Effect on Prices ──────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    var(--primary) 0%,
+    #e8c99b 25%,
+    var(--primary) 50%,
+    #e8c99b 75%,
+    var(--primary) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ── Cart Add Bounce ───────────────────────────────────────── */
+@keyframes cartBounce {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.25); }
+  60% { transform: scale(0.95); }
+  80% { transform: scale(1.05); }
+}
+
+.cart-bounce {
+  animation: cartBounce 0.5s ease;
+}
+
+/* ── Button Ripple Effect ──────────────────────────────────── */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+  opacity: 0;
+}
+
+.btn-ripple:active::after {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+  transition: none;
+}
+
+/* ── Gradient Text for Section Headings ─────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary) 0%, #e8c99b 50%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Section Divider ───────────────────────────────────────── */
+.section-divider {
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  margin: 0 auto 2rem;
+  border-radius: 2px;
+}
+
+.section-divider-lg {
+  width: 120px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--primary), #e8c99b, var(--primary), transparent);
+  margin: 1rem auto 3rem;
+  border-radius: 2px;
+}
+
+/* ── Navbar Scroll State ───────────────────────────────────── */
+.navbar.scrolled {
+  background-color: rgba(1, 1, 1, 0.95) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom-color: rgba(182, 137, 91, 0.3);
+}
+
+/* ── Particle Canvas ───────────────────────────────────────── */
+#hero-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero .content {
+  z-index: 2;
+}
+
+/* ── Card Hover Glow ───────────────────────────────────────── */
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: rgba(182, 137, 91, 0.3);
+  }
+  50% {
+    border-color: rgba(182, 137, 91, 0.7);
+  }
+}
+
+/* ── Social Icon Hover ─────────────────────────────────────── */
+@keyframes socialBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+footer .social a:hover {
+  animation: socialBounce 0.4s ease;
+  display: inline-block;
+}
+
+/* ── Spinning Coffee Bean (decorative) ─────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-slow {
+  animation: spin 12s linear infinite;
+}
+
+/* ── Typewriter Cursor Blink ───────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── Smooth Image Zoom on Hover ────────────────────────────── */
+.img-zoom-wrapper {
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.img-zoom-wrapper img {
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.img-zoom-wrapper:hover img {
+  transform: scale(1.08);
+}
+
+/* ── Toast/Notification Pop ────────────────────────────────── */
+@keyframes toastIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-notification {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: linear-gradient(135deg, #1a1a1a, #222);
+  border: 1px solid var(--primary);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  z-index: 10000;
+  animation: toastIn 0.4s ease forwards;
+  box-shadow: 0 8px 32px rgba(182, 137, 91, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.toast-notification.fade-out {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* ── Reduce motion for accessibility ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .hero-float,
+  .badge-available,
+  .shimmer-text {
+    animation: none !important;
+  }
+
+  .hero-animate-title,
+  .hero-animate-sub,
+  .hero-animate-cta {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+
